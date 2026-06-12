@@ -331,7 +331,6 @@ document.getElementById('btn-salvar').onclick = () => {
         
         document.getElementById('modal-placar').style.display = "none";
         
-        // RECARREGA A TELA INSTANTANEAMENTE APÓS SALVAR
         const searchInput = document.getElementById('search-input');
         if (searchInput && searchInput.value.trim() !== "") {
             searchInput.dispatchEvent(new Event('input'));
@@ -372,14 +371,14 @@ function criarCardJogo(jogo, fase, index) {
             badgeHtml = '<span class="badge-aovivo">AO VIVO</span>';
         } else if (minutosPassados > 120) {
             aoVivoClass = '';
-            badgeHtml = '<span class="badge-encerrado" style="background-color: #6B7280; color: #FFFFFF; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 800; letter-spacing: 0.5px; margin-left: 8px;">JOGO ENCERRADO</span>';
+            /* NOVA TAG ENCERRADO: Limpa, classe CSS externa controlada */
+            badgeHtml = '<span class="badge-encerrado">ENCERRADO</span>';
         }
     }
 
     const nomeFaseCard = listaGrupos.includes(fase) ? `${fase} • ${jogo.data}` : `${fase} • ${jogo.data}`;
     const penaltisHtml = jogo.penaltis ? `<div class="penalties-text">Pênaltis (${jogo.penaltis})</div>` : '';
     
-    // DEFINIÇÃO DAS CORES DE VITÓRIA E DERROTA
     let classT1 = "team home";
     let classT2 = "team away";
 
