@@ -12,7 +12,6 @@ const firebaseConfig = {
     measurementId: "G-MJ7D0RX5MY"
 };
 
-// Inicializa a conexão global do Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
@@ -53,7 +52,6 @@ let isAppIniciado = false;
 const listaGrupos = ["Grupo A", "Grupo B", "Grupo C", "Grupo D", "Grupo E", "Grupo F", "Grupo G", "Grupo H", "Grupo I", "Grupo J", "Grupo K", "Grupo L"];
 
 function salvarBD() {
-    // Envia os dados instantaneamente para o Firebase
     db.ref('copa2026_oficial').set(bancoDeDados);
 }
 
@@ -228,7 +226,7 @@ function atualizarStatusAoVivo() {
     });
 
     if (mudouAlgo) {
-        salvarBD(); // Atualiza na nuvem se o relógio mudou os status
+        salvarBD(); 
     }
 }
 setInterval(atualizarStatusAoVivo, 30000);
@@ -248,7 +246,10 @@ window.editarNomeTime = function(fase, indexJogo, lado) {
     if (novoNome !== null && novoNome.trim() !== "") {
         if (lado === 't1') jogo.t1 = novoNome.trim();
         else jogo.t2 = novoNome.trim();
+        
         salvarBD();
+        const abaAtiva = document.querySelector('.menu-wrapper button.ativo')?.innerText || 'Jogos (Fase de Grupos)';
+        carregarAba(abaAtiva);
     }
 };
 
@@ -330,9 +331,13 @@ document.getElementById('btn-salvar').onclick = () => {
         
         document.getElementById('modal-placar').style.display = "none";
         
+        // RECARREGA A TELA INSTANTANEAMENTE APÓS SALVAR
         const searchInput = document.getElementById('search-input');
         if (searchInput && searchInput.value.trim() !== "") {
             searchInput.dispatchEvent(new Event('input'));
+        } else {
+            const abaAtiva = document.querySelector('.menu-wrapper button.ativo')?.innerText || 'Tabelas de Classificação';
+            carregarAba(abaAtiva);
         }
     }
 };
@@ -374,16 +379,40 @@ function criarCardJogo(jogo, fase, index) {
     const nomeFaseCard = listaGrupos.includes(fase) ? `${fase} • ${jogo.data}` : `${fase} • ${jogo.data}`;
     const penaltisHtml = jogo.penaltis ? `<div class="penalties-text">Pênaltis (${jogo.penaltis})</div>` : '';
     
+    // DEFINIÇÃO DAS CORES DE VITÓRIA E DERROTA
+    let classT1 = "team home";
+    let classT2 = "team away";
+
+    if (jogo.placar && jogo.placar !== "-") {
+        let [g1, g2] = jogo.placar.split('-').map(Number);
+        let p1 = 0, p2 = 0;
+        
+        if (jogo.penaltis) {
+            [p1, p2] = jogo.penaltis.split('-').map(Number);
+        }
+
+        if (g1 > g2 || p1 > p2) {
+            classT1 += " team-winner";
+            classT2 += " team-loser";
+        } else if (g2 > g1 || p2 > p1) {
+            classT1 += " team-loser";
+            classT2 += " team-winner";
+        } else {
+            classT1 += " team-draw";
+            classT2 += " team-draw";
+        }
+    }
+
     return `
         <div class="card${aoVivoClass}">
             <div class="card-header">${nomeFaseCard} ${badgeHtml}</div>
             <div class="card-body">
-                <div class="team home" onclick="editarNomeTime('${fase}', ${index}, 't1')" style="cursor:pointer;" title="Clique para editar seleção">${renderTime(jogo.t1, 'esquerda')}</div>
+                <div class="${classT1}" onclick="editarNomeTime('${fase}', ${index}, 't1')" style="cursor:pointer;" title="Clique para editar seleção">${renderTime(jogo.t1, 'esquerda')}</div>
                 <div class="score" style="cursor: pointer;" title="Clique para editar placar" onclick="editarPlacar('${fase}', ${index})">
                     ${jogo.placar}
                     ${penaltisHtml}
                 </div>
-                <div class="team away" onclick="editarNomeTime('${fase}', ${index}, 't2')" style="cursor:pointer;" title="Clique para editar seleção">${renderTime(jogo.t2, 'direita')}</div>
+                <div class="${classT2}" onclick="editarNomeTime('${fase}', ${index}, 't2')" style="cursor:pointer;" title="Clique para editar seleção">${renderTime(jogo.t2, 'direita')}</div>
             </div>
         </div>
     `;
@@ -482,7 +511,7 @@ function carregarAba(abaNome) {
 }
 
 // ==========================================
-// FUNCIONALIDADE DA BARRA DE PESQUISA (Times e Datas)
+// FUNCIONALIDADE DA BARRA DE PESQUISA
 // ==========================================
 const searchInput = document.getElementById('search-input');
 if(searchInput) {
@@ -521,9 +550,6 @@ if(searchInput) {
     });
 }
 
-// ==========================================
-// ATALHO SECRETO PARA RESETAR O BANCO DE DADOS
-// ==========================================
 document.addEventListener("keydown", (e) => {
     if (e.key === "F4") {
         const confirmar = confirm("ATENÇÃO: Deseja realmente resetar todos os placares da nuvem e voltar ao início da Copa?");
@@ -553,13 +579,11 @@ function iniciarApp() {
     carregarAba('Tabelas de Classificação');
 }
 
-// O OUVINTE EM TEMPO REAL: Substitui a lógica antiga do localStorage
 document.addEventListener("DOMContentLoaded", () => {
     db.ref('copa2026_oficial').on('value', (snapshot) => {
         if (snapshot.exists()) {
             bancoDeDados = snapshot.val();
         } else {
-            // Se o banco estiver vazio, carrega os dados oficiais do dados.js e envia pra nuvem
             bancoDeDados = JSON.parse(JSON.stringify(dadosIniciais));
             db.ref('copa2026_oficial').set(bancoDeDados);
         }
@@ -568,8 +592,6 @@ document.addEventListener("DOMContentLoaded", () => {
             isAppIniciado = true;
             iniciarApp();
         } else {
-            // Se já estiver logado e uma atualização da nuvem chegar, 
-            // só atualiza a tela se o modal de edição não estiver aberto
             const modal = document.getElementById('modal-placar');
             if (modal && modal.style.display !== "flex") {
                 const searchBox = document.getElementById('search-input');

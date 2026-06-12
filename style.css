@@ -148,15 +148,23 @@ body {
 .bandeira-img { width: 20px; height: 15px; border-radius: 2px; object-fit: cover; box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
 .time-wrapper { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
 
-/* ================== CARDS DOS JOGOS ================== */
+/* ================== CARDS DOS JOGOS E CORES VENCEDOR/PERDEDOR ================== */
 #jogos-container, .jogos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
 .card { background-color: var(--surface-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease; }
 .card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); transform: translateY(-2px); }
 .card-header { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; text-align: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: center; align-items: center; gap: 8px; }
 .card-body { display: flex; align-items: center; justify-content: space-between; }
-.team { display: flex; align-items: center; font-size: 15px; font-weight: 600; flex: 1; }
+
+/* Adicionado padding e bordas arredondadas no team para o fundo funcionar */
+.team { display: flex; align-items: center; font-size: 15px; font-weight: 600; flex: 1; padding: 6px 12px; border-radius: 8px; transition: background-color 0.2s; }
 .team.home { justify-content: flex-end; text-align: right; }
 .team.away { justify-content: flex-start; text-align: left; }
+
+/* CORES DE VITÓRIA, DERROTA E EMPATE */
+.team-winner { background-color: #DBEAFE; color: #1E3A8A; } /* Fundo azul suave */
+.team-loser { background-color: #FEE2E2; color: #991B1B; opacity: 0.85; } /* Fundo vermelho suave */
+.team-draw { background-color: #F3F4F6; color: #4B5563; } /* Fundo cinza suave */
+
 .score { background-color: #F9FAFB; border: 1px solid var(--border-color); color: var(--text-primary); padding: 8px 16px; border-radius: 6px; font-size: 15px; font-weight: 700; margin: 0 16px; min-width: 44px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: background-color 0.2s; }
 .score:hover { background-color: #E5E7EB; }
 
