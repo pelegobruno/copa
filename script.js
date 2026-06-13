@@ -45,6 +45,62 @@ function renderTime(nome, lado = 'esquerda') {
 }
 
 // ==========================================
+// SISTEMA DYNAMIC DE ELENCO EXTERNO
+// ==========================================
+function obterElenco(selecao) {
+    // Busca na base global importada do jogadores.js
+    if (typeof elencosOficiais !== "undefined" && elencosOficiais[selecao]) {
+        return elencosOficiais[selecao];
+    }
+
+    // Gerador dinâmico caso a seleção ainda não tenha sido mapeada no jogadores.js
+    let elencoFicticio = [];
+    let num = 1;
+    for(let i=0; i<3; i++) elencoFicticio.push({ num: num++, nome: `Goleiro Reservado ${i+1}`, pos: "Goleiro" });
+    for(let i=0; i<7; i++) elencoFicticio.push({ num: num++, nome: `Defensor Convocado ${i+1}`, pos: "Defensor" });
+    for(let i=0; i<7; i++) elencoFicticio.push({ num: num++, nome: `Meio-campista Convocado ${i+1}`, pos: "Meio-campista" });
+    for(let i=0; i<6; i++) elencoFicticio.push({ num: num++, nome: `Atacante Convocado ${i+1}`, pos: "Atacante" });
+    return elencoFicticio;
+}
+
+window.abrirElenco = function(selecao) {
+    const modal = document.getElementById('modal-elenco');
+    const titulo = document.getElementById('elenco-titulo');
+    const bandeira = document.getElementById('elenco-bandeira');
+    const lista = document.getElementById('elenco-lista');
+
+    titulo.innerText = selecao;
+    const codigo = bandeiras[selecao];
+    if(codigo) {
+        bandeira.src = `https://flagcdn.com/w40/${codigo}.png`;
+        bandeira.style.display = "block";
+    } else {
+        bandeira.style.display = "none";
+    }
+
+    const jogadores = obterElenco(selecao);
+    let htmlLista = '';
+    jogadores.forEach(jog => {
+        htmlLista += `
+            <div class="jogador-item">
+                <div class="jogador-num">${jog.num}</div>
+                <div class="jogador-dados">
+                    <div class="jogador-nome">${jog.nome}</div>
+                    <div class="jogador-pos">${jog.pos}</div>
+                </div>
+            </div>
+        `;
+    });
+
+    lista.innerHTML = htmlLista;
+    modal.style.display = "flex";
+};
+
+window.fecharElenco = function() {
+    document.getElementById('modal-elenco').style.display = "none";
+};
+
+// ==========================================
 // SINCRO/ESTADO DO BANCO DE DADOS DA NUVEM
 // ==========================================
 let bancoDeDados = {};
@@ -181,7 +237,7 @@ function atualizarFasesMataMata() {
 }
 
 // ==========================================
-// MONITOR DE RELÓGIO UNIVERSAL (AO VIVO / ENCERRADO)
+// MONITOR DE RELÓGIO UNIVERSAL (AO VIVO E 0-0 AUTOMÁTICO)
 // ==========================================
 function atualizarStatusAoVivo() {
     const agora = new Date();
@@ -210,7 +266,6 @@ function atualizarStatusAoVivo() {
                     jogo.aoVivo = true;
                     jogo.encerrado = false;
                     
-                    // MELHORIA SOLICITADA: Preenche com 0-0 automaticamente ao ativar o Ao Vivo
                     if (!jogo.placar || jogo.placar === "-") {
                         jogo.placar = "0-0";
                     }
@@ -232,7 +287,7 @@ function atualizarStatusAoVivo() {
     });
 
     if (mudouAlgo) {
-        recalcularTabelas(); // Recalcula a tabela para computar o 0-0 automático na hora
+        recalcularTabelas(); 
         atualizarFasesMataMata();
         salvarBD();
         
@@ -375,12 +430,12 @@ function criarCardJogo(jogo, fase, index) {
         const min = parseInt(matchInfo[4]);
         const dataJogo = new Date(2026, mes, dia, hora, min);
         const difMs = agora.getTime() - dataJogo.getTime();
-        const minutosPassados = difMs / (1000 * 60);
+        const minutesPassed = difMs / (1000 * 60);
 
-        if (minutosPassados >= 0 && minutosPassados <= 120) {
+        if (minutesPassed >= 0 && minutesPassed <= 120) {
             aoVivoClass = ' ao-vivo';
             badgeHtml = '<span class="badge-aovivo">AO VIVO</span>';
-        } else if (minutosPassados > 120) {
+        } else if (minutesPassed > 120) {
             aoVivoClass = ' jogo-encerrado';
             badgeHtml = '<span class="badge-encerrado">ENCERRADO</span>';
         }
@@ -469,7 +524,7 @@ function carregarAba(abaNome) {
                 return `
                     <tr${classeTr}>
                         <td>${time.pos}º</td>
-                        <td class="time-col">
+                        <td class="time-col time-hover" onclick="abrirElenco('${time.time}')" title="Ver 23 convocados">
                             ${renderTime(time.time)}
                             ${liveDotHtml}
                         </td>
@@ -609,8 +664,10 @@ document.addEventListener("DOMContentLoaded", () => {
             isAppIniciado = true;
             iniciarApp();
         } else {
-            const modal = document.getElementById('modal-placar');
-            if (modal && modal.style.display !== "flex") {
+            const modalPlacar = document.getElementById('modal-placar');
+            const modalElenco = document.getElementById('modal-elenco');
+            
+            if ((!modalPlacar || modalPlacar.style.display !== "flex") && (!modalElenco || modalElenco.style.display !== "flex")) {
                 const searchBox = document.getElementById('search-input');
                 if (searchBox && searchBox.value.trim() !== "") {
                     searchBox.dispatchEvent(new Event('input')); 
