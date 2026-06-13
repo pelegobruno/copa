@@ -204,10 +204,16 @@ function atualizarStatusAoVivo() {
                 
                 let statusAntigoAoVivo = jogo.aoVivo;
                 let statusAntigoEncerrado = jogo.encerrado;
+                let placarAntigo = jogo.placar;
 
                 if (minutosPassados >= 0 && minutosPassados <= 120) {
                     jogo.aoVivo = true;
                     jogo.encerrado = false;
+                    
+                    // MELHORIA SOLICITADA: Preenche com 0-0 automaticamente ao ativar o Ao Vivo
+                    if (!jogo.placar || jogo.placar === "-") {
+                        jogo.placar = "0-0";
+                    }
                 } 
                 else if (minutosPassados > 120) {
                     jogo.aoVivo = false;
@@ -218,7 +224,7 @@ function atualizarStatusAoVivo() {
                     jogo.encerrado = false;
                 }
 
-                if (jogo.aoVivo !== statusAntigoAoVivo || jogo.encerrado !== statusAntigoEncerrado) {
+                if (jogo.aoVivo !== statusAntigoAoVivo || jogo.encerrado !== statusAntigoEncerrado || jogo.placar !== placarAntigo) {
                     mudouAlgo = true;
                 }
             }
@@ -226,8 +232,10 @@ function atualizarStatusAoVivo() {
     });
 
     if (mudouAlgo) {
+        recalcularTabelas(); // Recalcula a tabela para computar o 0-0 automático na hora
+        atualizarFasesMataMata();
         salvarBD();
-        // RECARREGA A TELA SOZINHO SE O STATUS DO JOGO MUDOU NO RELÓGIO
+        
         const abaAtiva = document.querySelector('.menu-wrapper button.ativo')?.innerText || 'Tabelas de Classificação';
         carregarAba(abaAtiva);
     }
@@ -455,7 +463,6 @@ function carregarAba(abaNome) {
                 if (time.pos === 1) classeTr = ' class="primeiro-lugar"';
                 else if (time.pos === 2) classeTr = ' class="segundo-lugar"';
 
-                // VERIFICA SE A SELEÇÃO ESTÁ JOGANDO AO VIVO NESTE EXATO MINUTO
                 const estaJogandoAgora = jogosDoGrupo.some(j => j.aoVivo && (j.t1 === time.time || j.t2 === time.time));
                 const liveDotHtml = estaJogandoAgora ? '<span class="live-dot" title="Jogando agora"></span>' : '';
 
