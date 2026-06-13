@@ -226,7 +226,10 @@ function atualizarStatusAoVivo() {
     });
 
     if (mudouAlgo) {
-        salvarBD(); 
+        salvarBD();
+        // RECARREGA A TELA SOZINHO SE O STATUS DO JOGO MUDOU NO RELÓGIO
+        const abaAtiva = document.querySelector('.menu-wrapper button.ativo')?.innerText || 'Tabelas de Classificação';
+        carregarAba(abaAtiva);
     }
 }
 setInterval(atualizarStatusAoVivo, 30000);
@@ -370,7 +373,6 @@ function criarCardJogo(jogo, fase, index) {
             aoVivoClass = ' ao-vivo';
             badgeHtml = '<span class="badge-aovivo">AO VIVO</span>';
         } else if (minutosPassados > 120) {
-            // AQUI É INJETADA A CLASSE DE JOGO APAGADO
             aoVivoClass = ' jogo-encerrado';
             badgeHtml = '<span class="badge-encerrado">ENCERRADO</span>';
         }
@@ -397,7 +399,6 @@ function criarCardJogo(jogo, fase, index) {
             classT1 += " team-loser";
             classT2 += " team-winner";
         } else {
-            // Aplicado a cor amarela para empates
             classT1 += " team-draw";
             classT2 += " team-draw";
         }
@@ -447,15 +448,24 @@ function carregarAba(abaNome) {
         let htmlTabelas = "";
         listaGrupos.forEach(grupo => {
             const classif = bancoDeDados[grupo].classificacao;
+            const jogosDoGrupo = bancoDeDados[grupo].jogos;
+
             const linhasHtml = classif.map(time => {
                 let classeTr = '';
                 if (time.pos === 1) classeTr = ' class="primeiro-lugar"';
                 else if (time.pos === 2) classeTr = ' class="segundo-lugar"';
 
+                // VERIFICA SE A SELEÇÃO ESTÁ JOGANDO AO VIVO NESTE EXATO MINUTO
+                const estaJogandoAgora = jogosDoGrupo.some(j => j.aoVivo && (j.t1 === time.time || j.t2 === time.time));
+                const liveDotHtml = estaJogandoAgora ? '<span class="live-dot" title="Jogando agora"></span>' : '';
+
                 return `
                     <tr${classeTr}>
                         <td>${time.pos}º</td>
-                        <td class="time-col">${renderTime(time.time)}</td>
+                        <td class="time-col">
+                            ${renderTime(time.time)}
+                            ${liveDotHtml}
+                        </td>
                         <td class="pontos-destaque">${time.pts}</td>
                         <td>${time.j}</td>
                         <td>${time.v}</td>
