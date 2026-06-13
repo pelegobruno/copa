@@ -370,8 +370,8 @@ function criarCardJogo(jogo, fase, index) {
             aoVivoClass = ' ao-vivo';
             badgeHtml = '<span class="badge-aovivo">AO VIVO</span>';
         } else if (minutosPassados > 120) {
-            aoVivoClass = '';
-            /* NOVA TAG ENCERRADO: Limpa, classe CSS externa controlada */
+            // AQUI É INJETADA A CLASSE DE JOGO APAGADO
+            aoVivoClass = ' jogo-encerrado';
             badgeHtml = '<span class="badge-encerrado">ENCERRADO</span>';
         }
     }
@@ -397,6 +397,7 @@ function criarCardJogo(jogo, fase, index) {
             classT1 += " team-loser";
             classT2 += " team-winner";
         } else {
+            // Aplicado a cor amarela para empates
             classT1 += " team-draw";
             classT2 += " team-draw";
         }
