@@ -404,7 +404,6 @@ document.getElementById('btn-salvar').onclick = () => {
 // ==========================================
 // RENDERIZAÇÃO DA INTERFACE GRÁFICA
 // ==========================================
-// NOVO: Adicionado "Jogos de Hoje" como primeira aba
 const abas = ["Jogos de Hoje", "Tabelas de Classificação", "Jogos (Fase de Grupos)", "16-avos", "Oitavas", "Quartas", "Semifinais", "3º Lugar", "Final"];
 const menuContainer = document.getElementById('menu');
 const tituloFase = document.getElementById('fase-titulo');
@@ -509,7 +508,7 @@ function carregarAba(abaNome) {
 
         tituloJogos.innerText = `Partidas de Hoje (${dataHojeStr})`;
         classificacaoContainer.style.display = "none";
-        jogosContainer.style.display = "block"; // Reset para o Grid Interno funcionar
+        jogosContainer.style.display = "block"; 
 
         // Filtra todos os jogos do banco de dados que batem com a data de hoje
         let jogosHoje = [];
@@ -520,6 +519,20 @@ function carregarAba(abaNome) {
                     jogosHoje.push({ jogo, fase, index });
                 }
             });
+        });
+
+        // ORDENAÇÃO CRONOLÓGICA PELO HORÁRIO
+        jogosHoje.sort((a, b) => {
+            const regexTempo = /(\d{2}):(\d{2})/;
+            const timeA = a.jogo.data.match(regexTempo);
+            const timeB = b.jogo.data.match(regexTempo);
+            
+            if (timeA && timeB) {
+                const minutosA = parseInt(timeA[1]) * 60 + parseInt(timeA[2]);
+                const minutosB = parseInt(timeB[1]) * 60 + parseInt(timeB[2]);
+                return minutosA - minutosB;
+            }
+            return 0;
         });
 
         let cardsHtml = "";
@@ -545,7 +558,7 @@ function carregarAba(abaNome) {
 
         let rankingHtml = `
             <div class="ranking-geral-box">
-                <div class="ranking-geral-title">Ranking</div>
+                <div class="ranking-geral-title">Ranking Geral (1 ao 48)</div>
                 <table class="ranking-geral-table">
                     <thead>
                         <tr><th>#</th><th class="time-col">Seleção</th><th>P</th><th>SG</th></tr>
@@ -723,7 +736,7 @@ function iniciarApp() {
     });
     
     atualizarStatusAoVivo(); 
-    carregarAba('Jogos de Hoje'); // NOVO: Inicia na aba Jogos do Dia
+    carregarAba('Jogos de Hoje');
 }
 
 document.addEventListener("DOMContentLoaded", () => {
