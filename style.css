@@ -160,3 +160,52 @@ tr.primeiro-lugar .pontos-destaque { color: #059669; }
 @keyframes pulse-blue-row { 0% { background-color: rgba(37, 99, 235, 0.12); } 50% { background-color: rgba(37, 99, 235, 0.02); } 100% { background-color: rgba(37, 99, 235, 0.12); } }
 tr.segundo-lugar td { animation: pulse-blue-row 3s ease-in-out infinite; color: #1E3A8A; }
 tr.segundo-lugar .pontos-destaque { color: var(--second-blue); }
+
+/* =========================================================
+   NOVO: LAYOUT JOGOS DE HOJE E RANKING GERAL (1 a 48)
+========================================================= */
+.split-layout { 
+    display: grid; 
+    grid-template-columns: 2fr 1fr; /* Coluna dos Jogos mais larga que o Ranking */
+    gap: 32px; 
+    align-items: start; 
+}
+
+.ranking-geral-box { 
+    background-color: var(--surface-color); 
+    border: 1px solid var(--border-color); 
+    border-radius: 12px; 
+    padding: 20px; 
+    position: sticky; 
+    top: 90px; 
+    max-height: 75vh; /* O ranking tem barra de rolagem se ficar muito grande */
+    overflow-y: auto; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02); 
+}
+
+.ranking-geral-box::-webkit-scrollbar { width: 6px; }
+.ranking-geral-box::-webkit-scrollbar-thumb { background-color: #CBD5E1; border-radius: 10px; }
+
+.ranking-geral-title { 
+    font-size: 15px; 
+    font-weight: 800; 
+    text-transform: uppercase; 
+    color: var(--text-primary); 
+    margin-bottom: 16px; 
+    text-align: center; 
+    border-bottom: 2px solid #F3F4F6; 
+    padding-bottom: 12px; 
+    letter-spacing: 0.5px;
+}
+
+.ranking-geral-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ranking-geral-table th, .ranking-geral-table td { padding: 10px 4px; text-align: center; border-bottom: 1px solid #F3F4F6; color: var(--text-primary); }
+.ranking-geral-table th { color: var(--text-secondary); font-weight: 600; }
+.ranking-geral-table .time-col { text-align: left; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.ranking-geral-table tr:last-child td { border-bottom: none; }
+
+/* Para as telas menores (celular), joga o ranking pra baixo dos jogos */
+@media (max-width: 900px) {
+    .split-layout { grid-template-columns: 1fr; }
+    .ranking-geral-box { position: static; max-height: 500px; margin-top: 24px; }
+}

@@ -48,12 +48,9 @@ function renderTime(nome, lado = 'esquerda') {
 // SISTEMA DYNAMIC DE ELENCO EXTERNO
 // ==========================================
 function obterElenco(selecao) {
-    // Busca na base global importada do jogadores.js
     if (typeof elencosOficiais !== "undefined" && elencosOficiais[selecao]) {
         return elencosOficiais[selecao];
     }
-
-    // Gerador dinâmico caso a seleção ainda não tenha sido mapeada no jogadores.js
     let elencoFicticio = [];
     let num = 1;
     for(let i=0; i<3; i++) elencoFicticio.push({ num: num++, nome: `Goleiro Reservado ${i+1}`, pos: "Goleiro" });
@@ -155,9 +152,6 @@ function recalcularTabelas() {
     });
 }
 
-// ==========================================
-// INTELIGÊNCIA: AUTO-AVANÇO MATA-MATA
-// ==========================================
 function atualizarFasesMataMata() {
     const classificados = {};
 
@@ -237,7 +231,7 @@ function atualizarFasesMataMata() {
 }
 
 // ==========================================
-// MONITOR DE RELÓGIO UNIVERSAL (AO VIVO E 0-0 AUTOMÁTICO)
+// MONITOR DE RELÓGIO UNIVERSAL
 // ==========================================
 function atualizarStatusAoVivo() {
     const agora = new Date();
@@ -291,7 +285,7 @@ function atualizarStatusAoVivo() {
         atualizarFasesMataMata();
         salvarBD();
         
-        const abaAtiva = document.querySelector('.menu-wrapper button.ativo')?.innerText || 'Tabelas de Classificação';
+        const abaAtiva = document.querySelector('.menu-wrapper button.ativo')?.innerText || 'Jogos de Hoje';
         carregarAba(abaAtiva);
     }
 }
@@ -314,7 +308,7 @@ window.editarNomeTime = function(fase, indexJogo, lado) {
         else jogo.t2 = novoNome.trim();
         
         salvarBD();
-        const abaAtiva = document.querySelector('.menu-wrapper button.ativo')?.innerText || 'Jogos (Fase de Grupos)';
+        const abaAtiva = document.querySelector('.menu-wrapper button.ativo')?.innerText || 'Jogos de Hoje';
         carregarAba(abaAtiva);
     }
 };
@@ -401,7 +395,7 @@ document.getElementById('btn-salvar').onclick = () => {
         if (searchInput && searchInput.value.trim() !== "") {
             searchInput.dispatchEvent(new Event('input'));
         } else {
-            const abaAtiva = document.querySelector('.menu-wrapper button.ativo')?.innerText || 'Tabelas de Classificação';
+            const abaAtiva = document.querySelector('.menu-wrapper button.ativo')?.innerText || 'Jogos de Hoje';
             carregarAba(abaAtiva);
         }
     }
@@ -410,7 +404,8 @@ document.getElementById('btn-salvar').onclick = () => {
 // ==========================================
 // RENDERIZAÇÃO DA INTERFACE GRÁFICA
 // ==========================================
-const abas = ["Tabelas de Classificação", "Jogos (Fase de Grupos)", "16-avos", "Oitavas", "Quartas", "Semifinais", "3º Lugar", "Final"];
+// NOVO: Adicionado "Jogos de Hoje" como primeira aba
+const abas = ["Jogos de Hoje", "Tabelas de Classificação", "Jogos (Fase de Grupos)", "16-avos", "Oitavas", "Quartas", "Semifinais", "3º Lugar", "Final"];
 const menuContainer = document.getElementById('menu');
 const tituloFase = document.getElementById('fase-titulo');
 const classificacaoContainer = document.getElementById('classificacao-container');
@@ -502,7 +497,90 @@ function carregarAba(abaNome) {
     recalcularTabelas(); 
     atualizarFasesMataMata();
 
-    if (abaNome === "Tabelas de Classificação") {
+    // ==========================================
+    // NOVA ABA: JOGOS DE HOJE + RANKING 1 A 48
+    // ==========================================
+    if (abaNome === "Jogos de Hoje") {
+        tituloJogos.style.display = "block";
+        const hoje = new Date();
+        const diaStr = String(hoje.getDate()).padStart(2, '0');
+        const mesStr = String(hoje.getMonth() + 1).padStart(2, '0');
+        const dataHojeStr = `${diaStr}/${mesStr}`;
+
+        tituloJogos.innerText = `Partidas de Hoje (${dataHojeStr})`;
+        classificacaoContainer.style.display = "none";
+        jogosContainer.style.display = "block"; // Reset para o Grid Interno funcionar
+
+        // Filtra todos os jogos do banco de dados que batem com a data de hoje
+        let jogosHoje = [];
+        Object.keys(bancoDeDados).forEach(fase => {
+            let arrayJogos = listaGrupos.includes(fase) ? bancoDeDados[fase].jogos : bancoDeDados[fase];
+            arrayJogos.forEach((jogo, index) => {
+                if (jogo.data.startsWith(dataHojeStr)) {
+                    jogosHoje.push({ jogo, fase, index });
+                }
+            });
+        });
+
+        let cardsHtml = "";
+        if (jogosHoje.length > 0) {
+            jogosHoje.forEach(item => {
+                cardsHtml += criarCardJogo(item.jogo, item.fase, item.index);
+            });
+        } else {
+            cardsHtml = `<div style="text-align: center; padding: 40px; background: #fff; border-radius: 12px; border: 1px dashed #e5e7eb;">Nenhuma partida agendada para a data de hoje.</div>`;
+        }
+
+        // Sistema para gerar o Ranking das 48 Seleções
+        let todosOsTimes = [];
+        listaGrupos.forEach(grupo => {
+            todosOsTimes = todosOsTimes.concat(bancoDeDados[grupo].classificacao);
+        });
+        
+        todosOsTimes.sort((a, b) => {
+            if (b.pts !== a.pts) return b.pts - a.pts;
+            if (b.sg !== a.sg) return b.sg - a.sg;
+            return b.gp - a.gp;
+        });
+
+        let rankingHtml = `
+            <div class="ranking-geral-box">
+                <div class="ranking-geral-title">Ranking</div>
+                <table class="ranking-geral-table">
+                    <thead>
+                        <tr><th>#</th><th class="time-col">Seleção</th><th>P</th><th>SG</th></tr>
+                    </thead>
+                    <tbody>
+        `;
+        todosOsTimes.forEach((time, index) => {
+            rankingHtml += `
+                <tr>
+                    <td><strong>${index + 1}º</strong></td>
+                    <td class="time-col time-hover" onclick="abrirElenco('${time.time}')" title="Ver 23 convocados">
+                        ${renderTime(time.time)}
+                    </td>
+                    <td><strong>${time.pts}</strong></td>
+                    <td>${time.sg}</td>
+                </tr>
+            `;
+        });
+        rankingHtml += `</tbody></table></div>`;
+
+        // Renderiza o visual dividido (Split Layout)
+        jogosContainer.innerHTML = `
+            <div class="split-layout">
+                <div class="jogos-col">
+                    <div class="jogos-grid">
+                        ${cardsHtml}
+                    </div>
+                </div>
+                <div class="ranking-col">
+                    ${rankingHtml}
+                </div>
+            </div>
+        `;
+    }
+    else if (abaNome === "Tabelas de Classificação") {
         tituloJogos.style.display = "none";
         classificacaoContainer.className = "tabelas-grid";
         classificacaoContainer.style.display = "grid";
@@ -591,7 +669,7 @@ if(searchInput) {
         const termo = e.target.value.toLowerCase().trim();
         
         if (termo === "") {
-            const abaAtiva = document.querySelector('.menu-wrapper button.ativo')?.innerText || 'Tabelas de Classificação';
+            const abaAtiva = document.querySelector('.menu-wrapper button.ativo')?.innerText || 'Jogos de Hoje';
             carregarAba(abaAtiva);
             return;
         }
@@ -634,9 +712,6 @@ document.addEventListener("keydown", (e) => {
     }
 });
 
-// ==========================================
-// INICIANDO O SISTEMA E CONECTANDO AO FIREBASE
-// ==========================================
 function iniciarApp() {
     abas.forEach(aba => {
         const btn = document.createElement('button');
@@ -648,7 +723,7 @@ function iniciarApp() {
     });
     
     atualizarStatusAoVivo(); 
-    carregarAba('Tabelas de Classificação');
+    carregarAba('Jogos de Hoje'); // NOVO: Inicia na aba Jogos do Dia
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -672,7 +747,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (searchBox && searchBox.value.trim() !== "") {
                     searchBox.dispatchEvent(new Event('input')); 
                 } else {
-                    const abaAtiva = document.querySelector('.menu-wrapper button.ativo')?.innerText || 'Tabelas de Classificação';
+                    const abaAtiva = document.querySelector('.menu-wrapper button.ativo')?.innerText || 'Jogos de Hoje';
                     carregarAba(abaAtiva); 
                 }
             }
