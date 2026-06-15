@@ -297,21 +297,7 @@ setInterval(atualizarStatusAoVivo, 30000);
 let jogoEditando = null;
 let faseEditando = null;
 
-window.editarNomeTime = function(fase, indexJogo, lado) {
-    let isFaseDeGrupos = listaGrupos.includes(fase);
-    let jogo = isFaseDeGrupos ? bancoDeDados[fase].jogos[indexJogo] : bancoDeDados[fase][indexJogo];
-    let nomeAtual = lado === 't1' ? jogo.t1 : jogo.t2;
-
-    const novoNome = prompt("Digite a seleção classificada:", nomeAtual);
-    if (novoNome !== null && novoNome.trim() !== "") {
-        if (lado === 't1') jogo.t1 = novoNome.trim();
-        else jogo.t2 = novoNome.trim();
-        
-        salvarBD();
-        const abaAtiva = document.querySelector('.menu-wrapper button.ativo')?.innerText || 'Jogos de Hoje';
-        carregarAba(abaAtiva);
-    }
-};
+// Função de editar nome da seleção foi removida para limpar o código e evitar cliques acidentais
 
 window.editarPlacar = function(fase, indexJogo) {
     faseEditando = fase;
@@ -461,16 +447,17 @@ function criarCardJogo(jogo, fase, index) {
         }
     }
 
+    // REMOVIDO: onclick e styles para editar nome do time. Agora são estáticos!
     return `
         <div class="card${aoVivoClass}">
             <div class="card-header">${nomeFaseCard} ${badgeHtml}</div>
             <div class="card-body">
-                <div class="${classT1}" onclick="editarNomeTime('${fase}', ${index}, 't1')" style="cursor:pointer;" title="Clique para editar seleção">${renderTime(jogo.t1, 'esquerda')}</div>
+                <div class="${classT1}">${renderTime(jogo.t1, 'esquerda')}</div>
                 <div class="score" style="cursor: pointer;" title="Clique para editar placar" onclick="editarPlacar('${fase}', ${index})">
                     ${jogo.placar}
                     ${penaltisHtml}
                 </div>
-                <div class="${classT2}" onclick="editarNomeTime('${fase}', ${index}, 't2')" style="cursor:pointer;" title="Clique para editar seleção">${renderTime(jogo.t2, 'direita')}</div>
+                <div class="${classT2}">${renderTime(jogo.t2, 'direita')}</div>
             </div>
         </div>
     `;
@@ -496,9 +483,6 @@ function carregarAba(abaNome) {
     recalcularTabelas(); 
     atualizarFasesMataMata();
 
-    // ==========================================
-    // NOVA ABA: JOGOS DE HOJE + RANKING 1 A 48
-    // ==========================================
     if (abaNome === "Jogos de Hoje") {
         tituloJogos.style.display = "block";
         const hoje = new Date();
@@ -510,7 +494,6 @@ function carregarAba(abaNome) {
         classificacaoContainer.style.display = "none";
         jogosContainer.style.display = "block"; 
 
-        // Filtra todos os jogos do banco de dados que batem com a data de hoje
         let jogosHoje = [];
         Object.keys(bancoDeDados).forEach(fase => {
             let arrayJogos = listaGrupos.includes(fase) ? bancoDeDados[fase].jogos : bancoDeDados[fase];
@@ -521,7 +504,6 @@ function carregarAba(abaNome) {
             });
         });
 
-        // ORDENAÇÃO CRONOLÓGICA PELO HORÁRIO
         jogosHoje.sort((a, b) => {
             const regexTempo = /(\d{2}):(\d{2})/;
             const timeA = a.jogo.data.match(regexTempo);
@@ -544,7 +526,6 @@ function carregarAba(abaNome) {
             cardsHtml = `<div style="text-align: center; padding: 40px; background: #fff; border-radius: 12px; border: 1px dashed #e5e7eb;">Nenhuma partida agendada para a data de hoje.</div>`;
         }
 
-        // Sistema para gerar o Ranking das 48 Seleções
         let todosOsTimes = [];
         listaGrupos.forEach(grupo => {
             todosOsTimes = todosOsTimes.concat(bancoDeDados[grupo].classificacao);
@@ -579,7 +560,6 @@ function carregarAba(abaNome) {
         });
         rankingHtml += `</tbody></table></div>`;
 
-        // Renderiza o visual dividido (Split Layout)
         jogosContainer.innerHTML = `
             <div class="split-layout">
                 <div class="jogos-col">
