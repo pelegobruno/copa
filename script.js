@@ -259,7 +259,6 @@ function atualizarStatusAoVivo() {
                 if (minutosPassados >= 0 && minutosPassados <= 120) {
                     jogo.aoVivo = true;
                     jogo.encerrado = false;
-                    
                     if (!jogo.placar || jogo.placar === "-") {
                         jogo.placar = "0-0";
                     }
@@ -296,8 +295,6 @@ setInterval(atualizarStatusAoVivo, 30000);
 // ==========================================
 let jogoEditando = null;
 let faseEditando = null;
-
-// Função de editar nome da seleção foi removida para limpar o código e evitar cliques acidentais
 
 window.editarPlacar = function(fase, indexJogo) {
     faseEditando = fase;
@@ -447,7 +444,6 @@ function criarCardJogo(jogo, fase, index) {
         }
     }
 
-    // REMOVIDO: onclick e styles para editar nome do time. Agora são estáticos!
     return `
         <div class="card${aoVivoClass}">
             <div class="card-header">${nomeFaseCard} ${badgeHtml}</div>
@@ -483,6 +479,9 @@ function carregarAba(abaNome) {
     recalcularTabelas(); 
     atualizarFasesMataMata();
 
+    // ==========================================
+    // NOVA ABA: JOGOS DE HOJE + RANKING DOS 3º
+    // ==========================================
     if (abaNome === "Jogos de Hoje") {
         tituloJogos.style.display = "block";
         const hoje = new Date();
@@ -526,12 +525,26 @@ function carregarAba(abaNome) {
             cardsHtml = `<div style="text-align: center; padding: 40px; background: #fff; border-radius: 12px; border: 1px dashed #e5e7eb;">Nenhuma partida agendada para a data de hoje.</div>`;
         }
 
-        let todosOsTimes = [];
+        // ==========================================
+        // RANKING DOS MELHORES 3º COLOCADOS (Estilo Sofascore)
+        // ==========================================
+        let terceiros = [];
         listaGrupos.forEach(grupo => {
-            todosOsTimes = todosOsTimes.concat(bancoDeDados[grupo].classificacao);
+            const classif = bancoDeDados[grupo].classificacao;
+            if (classif && classif.length >= 3) {
+                terceiros.push({
+                    grupo: grupo.replace('Grupo ', ''),
+                    time: classif[2].time,
+                    j: classif[2].j,
+                    gp: classif[2].gp,
+                    pts: classif[2].pts,
+                    sg: classif[2].sg
+                });
+            }
         });
         
-        todosOsTimes.sort((a, b) => {
+        // Lógica oficial FIFA: 1º Pontos, 2º Saldo de Gols, 3º Gols Pró
+        terceiros.sort((a, b) => {
             if (b.pts !== a.pts) return b.pts - a.pts;
             if (b.sg !== a.sg) return b.sg - a.sg;
             return b.gp - a.gp;
@@ -539,22 +552,35 @@ function carregarAba(abaNome) {
 
         let rankingHtml = `
             <div class="ranking-geral-box">
-                <div class="ranking-geral-title">Ranking Geral (1 ao 48)</div>
-                <table class="ranking-geral-table">
+                <div class="ranking-geral-title" style="display: flex; justify-content: space-between; align-items: center; border-bottom: none; margin-bottom: 8px;">
+                    <span>Melhores 3º Colocados</span>
+                    <span style="font-size: 10px; background: var(--live-green); color: white; padding: 3px 8px; border-radius: 6px;">Top 8 Avançam</span>
+                </div>
+                <table class="ranking-geral-table tabela-terceiros">
                     <thead>
-                        <tr><th>#</th><th class="time-col">Seleção</th><th>P</th><th>SG</th></tr>
+                        <tr>
+                            <th style="width: 25px;">#</th>
+                            <th class="time-col">Seleção</th>
+                            <th title="Jogos">J</th>
+                            <th title="Saldo de Gols">SG</th>
+                            <th title="Pontos">Pts</th>
+                        </tr>
                     </thead>
                     <tbody>
         `;
-        todosOsTimes.forEach((time, index) => {
+        
+        // Aplica a classe que gera a linha verde lateral
+        terceiros.forEach((t, index) => {
+            let rowClass = index < 8 ? 'classificado-row' : 'eliminado-row';
             rankingHtml += `
-                <tr>
-                    <td><strong>${index + 1}º</strong></td>
-                    <td class="time-col time-hover" onclick="abrirElenco('${time.time}')" title="Ver 23 convocados">
-                        ${renderTime(time.time)}
+                <tr class="${rowClass}">
+                    <td><strong>${index + 1}</strong></td>
+                    <td class="time-col time-hover" onclick="abrirElenco('${t.time}')" title="Ver 23 convocados">
+                        ${renderTime(t.time)} <span class="grupo-tag">${t.grupo}</span>
                     </td>
-                    <td><strong>${time.pts}</strong></td>
-                    <td>${time.sg}</td>
+                    <td>${t.j}</td>
+                    <td>${t.sg}</td>
+                    <td><strong>${t.pts}</strong></td>
                 </tr>
             `;
         });
