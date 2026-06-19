@@ -259,6 +259,7 @@ function atualizarStatusAoVivo() {
                 if (minutosPassados >= 0 && minutosPassados <= 120) {
                     jogo.aoVivo = true;
                     jogo.encerrado = false;
+                    
                     if (!jogo.placar || jogo.placar === "-") {
                         jogo.placar = "0-0";
                     }
@@ -480,7 +481,7 @@ function carregarAba(abaNome) {
     atualizarFasesMataMata();
 
     // ==========================================
-    // NOVA ABA: JOGOS DE HOJE + RANKING DOS 3º
+    // NOVA ABA: JOGOS DE HOJE + 3º COLOCADOS + RANKING 48
     // ==========================================
     if (abaNome === "Jogos de Hoje") {
         tituloJogos.style.display = "block";
@@ -493,6 +494,7 @@ function carregarAba(abaNome) {
         classificacaoContainer.style.display = "none";
         jogosContainer.style.display = "block"; 
 
+        // 1. CARDS DE HOJE
         let jogosHoje = [];
         Object.keys(bancoDeDados).forEach(fase => {
             let arrayJogos = listaGrupos.includes(fase) ? bancoDeDados[fase].jogos : bancoDeDados[fase];
@@ -507,7 +509,6 @@ function carregarAba(abaNome) {
             const regexTempo = /(\d{2}):(\d{2})/;
             const timeA = a.jogo.data.match(regexTempo);
             const timeB = b.jogo.data.match(regexTempo);
-            
             if (timeA && timeB) {
                 const minutosA = parseInt(timeA[1]) * 60 + parseInt(timeA[2]);
                 const minutosB = parseInt(timeB[1]) * 60 + parseInt(timeB[2]);
@@ -525,9 +526,7 @@ function carregarAba(abaNome) {
             cardsHtml = `<div style="text-align: center; padding: 40px; background: #fff; border-radius: 12px; border: 1px dashed #e5e7eb;">Nenhuma partida agendada para a data de hoje.</div>`;
         }
 
-        // ==========================================
-        // RANKING DOS MELHORES 3º COLOCADOS (Estilo Sofascore)
-        // ==========================================
+        // 2. TABELA DE MELHORES 3º COLOCADOS
         let terceiros = [];
         listaGrupos.forEach(grupo => {
             const classif = bancoDeDados[grupo].classificacao;
@@ -543,7 +542,6 @@ function carregarAba(abaNome) {
             }
         });
         
-        // Lógica oficial FIFA: 1º Pontos, 2º Saldo de Gols, 3º Gols Pró
         terceiros.sort((a, b) => {
             if (b.pts !== a.pts) return b.pts - a.pts;
             if (b.sg !== a.sg) return b.sg - a.sg;
@@ -569,7 +567,6 @@ function carregarAba(abaNome) {
                     <tbody>
         `;
         
-        // Aplica a classe que gera a linha verde lateral
         terceiros.forEach((t, index) => {
             let rowClass = index < 8 ? 'classificado-row' : 'eliminado-row';
             rankingHtml += `
@@ -586,6 +583,47 @@ function carregarAba(abaNome) {
         });
         rankingHtml += `</tbody></table></div>`;
 
+        // 3. NOVO: RANKING GERAL DE TODOS OS 48 TIMES
+        let todosOsTimes = [];
+        listaGrupos.forEach(grupo => {
+            todosOsTimes = todosOsTimes.concat(bancoDeDados[grupo].classificacao);
+        });
+        
+        todosOsTimes.sort((a, b) => {
+            if (b.pts !== a.pts) return b.pts - a.pts;
+            if (b.sg !== a.sg) return b.sg - a.sg;
+            return b.gp - a.gp;
+        });
+
+        let rankingGeralHtml = `
+            <div class="grupo-tabela-box" style="margin-top: 40px; border-color: var(--header-bg);">
+                <div class="grupo-tabela-header" style="background-color: var(--header-bg);">Ranking Geral da Copa (1º ao 48º)</div>
+                <div class="tabela-overflow" style="max-height: 500px; overflow-y: auto;">
+                    <table class="tabela-classificacao">
+                        <thead style="position: sticky; top: 0; background-color: #F9FAFB; z-index: 5; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                            <tr><th>#</th><th class="time-col">Seleção</th><th>PTS</th><th>J</th><th>V</th><th>E</th><th>D</th><th>SG</th></tr>
+                        </thead>
+                        <tbody>
+        `;
+        todosOsTimes.forEach((time, index) => {
+            rankingGeralHtml += `
+                <tr>
+                    <td>${index + 1}º</td>
+                    <td class="time-col time-hover" onclick="abrirElenco('${time.time}')" title="Ver 23 convocados">
+                        ${renderTime(time.time)}
+                    </td>
+                    <td class="pontos-destaque">${time.pts}</td>
+                    <td>${time.j}</td>
+                    <td>${time.v}</td>
+                    <td>${time.e}</td>
+                    <td>${time.d}</td>
+                    <td>${time.sg}</td>
+                </tr>
+            `;
+        });
+        rankingGeralHtml += `</tbody></table></div></div>`;
+
+        // RENDERIZA TUDO NA TELA
         jogosContainer.innerHTML = `
             <div class="split-layout">
                 <div class="jogos-col">
@@ -597,6 +635,7 @@ function carregarAba(abaNome) {
                     ${rankingHtml}
                 </div>
             </div>
+            ${rankingGeralHtml}
         `;
     }
     else if (abaNome === "Tabelas de Classificação") {
