@@ -109,7 +109,7 @@ function salvarBD() {
 }
 
 // ==========================================
-// INTELIGÊNCIA: CÁLCULO DE TABELA DE GRUPOS
+// INTELIGÊNCIA: CÁLCULO DE TABELA DE GRUPOS E DESEMPATE OFICIAL FIFA
 // ==========================================
 function recalcularTabelas() {
     listaGrupos.forEach(grupo => {
@@ -142,10 +142,32 @@ function recalcularTabelas() {
             }
         });
 
+        // ========================================================
+        // REGRA DE DESEMPATE OFICIAL (Pts -> SG -> GP -> Confronto Direto -> Alfabeto)
+        // ========================================================
         bancoDeDados[grupo].classificacao.sort((a, b) => {
-            if (b.pts !== a.pts) return b.pts - a.pts;
-            if (b.sg !== a.sg) return b.sg - a.sg;
-            return b.gp - a.gp;
+            if (b.pts !== a.pts) return b.pts - a.pts; // 1º Critério: Pontos
+            if (b.sg !== a.sg) return b.sg - a.sg;     // 2º Critério: Saldo de Gols
+            if (b.gp !== a.gp) return b.gp - a.gp;     // 3º Critério: Gols Pró
+            
+            // 4º Critério: Confronto Direto (Mano a Mano)
+            let jogoConfronto = bancoDeDados[grupo].jogos.find(j => 
+                (j.t1 === a.time && j.t2 === b.time) || (j.t1 === b.time && j.t2 === a.time)
+            );
+
+            if (jogoConfronto && jogoConfronto.placar && jogoConfronto.placar !== "-") {
+                let [g1, g2] = jogoConfronto.placar.split('-').map(Number);
+                if (jogoConfronto.t1 === a.time) {
+                    if (g1 > g2) return -1; // A ganhou o confronto direto
+                    if (g2 > g1) return 1;  // B ganhou o confronto direto
+                } else {
+                    if (g2 > g1) return -1; // A ganhou o confronto direto
+                    if (g1 > g2) return 1;  // B ganhou o confronto direto
+                }
+            }
+
+            // 5º Critério: Ordem Alfabética (Substitui o Sorteio/Fair Play de forma visualmente estável)
+            return a.time.localeCompare(b.time);
         });
 
         bancoDeDados[grupo].classificacao.forEach((t, i) => t.pos = i + 1);
@@ -480,9 +502,6 @@ function carregarAba(abaNome) {
     recalcularTabelas(); 
     atualizarFasesMataMata();
 
-    // ==========================================
-    // NOVA ABA: JOGOS DE HOJE + 3º COLOCADOS + RANKING 48
-    // ==========================================
     if (abaNome === "Jogos de Hoje") {
         tituloJogos.style.display = "block";
         const hoje = new Date();
@@ -494,7 +513,6 @@ function carregarAba(abaNome) {
         classificacaoContainer.style.display = "none";
         jogosContainer.style.display = "block"; 
 
-        // 1. CARDS DE HOJE
         let jogosHoje = [];
         Object.keys(bancoDeDados).forEach(fase => {
             let arrayJogos = listaGrupos.includes(fase) ? bancoDeDados[fase].jogos : bancoDeDados[fase];
@@ -526,7 +544,9 @@ function carregarAba(abaNome) {
             cardsHtml = `<div style="text-align: center; padding: 40px; background: #fff; border-radius: 12px; border: 1px dashed #e5e7eb;">Nenhuma partida agendada para a data de hoje.</div>`;
         }
 
-        // 2. TABELA DE MELHORES 3º COLOCADOS
+        // =========================================================
+        // CÁLCULO DOS MELHORES 3º COLOCADOS COM DESEMPATE OFICIAL
+        // =========================================================
         let terceiros = [];
         listaGrupos.forEach(grupo => {
             const classif = bancoDeDados[grupo].classificacao;
@@ -545,7 +565,8 @@ function carregarAba(abaNome) {
         terceiros.sort((a, b) => {
             if (b.pts !== a.pts) return b.pts - a.pts;
             if (b.sg !== a.sg) return b.sg - a.sg;
-            return b.gp - a.gp;
+            if (b.gp !== a.gp) return b.gp - a.gp;
+            return a.time.localeCompare(b.time); // Desempate Alfabético final
         });
 
         let rankingHtml = `
@@ -583,7 +604,9 @@ function carregarAba(abaNome) {
         });
         rankingHtml += `</tbody></table></div>`;
 
-        // 3. NOVO: RANKING GERAL DE TODOS OS 48 TIMES
+        // =========================================================
+        // RANKING GERAL 48 TIMES COM DESEMPATE OFICIAL
+        // =========================================================
         let todosOsTimes = [];
         listaGrupos.forEach(grupo => {
             todosOsTimes = todosOsTimes.concat(bancoDeDados[grupo].classificacao);
@@ -592,7 +615,8 @@ function carregarAba(abaNome) {
         todosOsTimes.sort((a, b) => {
             if (b.pts !== a.pts) return b.pts - a.pts;
             if (b.sg !== a.sg) return b.sg - a.sg;
-            return b.gp - a.gp;
+            if (b.gp !== a.gp) return b.gp - a.gp;
+            return a.time.localeCompare(b.time); // Desempate Alfabético final
         });
 
         let rankingGeralHtml = `
@@ -623,7 +647,6 @@ function carregarAba(abaNome) {
         });
         rankingGeralHtml += `</tbody></table></div></div>`;
 
-        // RENDERIZA TUDO NA TELA
         jogosContainer.innerHTML = `
             <div class="split-layout">
                 <div class="jogos-col">
