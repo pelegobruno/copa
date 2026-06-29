@@ -1090,7 +1090,7 @@ const elencosOficiais = {
     { num: 24, nome: "Ernest Nuamah", pos: "Atacante" }
     // Nota: Foram convocados 28 jogadores. Lista reduzida para 23.
 ],
-"Tchéquia": [
+"República Tcheca": [
     { num: 1, nome: "Matěj Kovář", pos: "Goleiro" },
     { num: 16, nome: "Jindřich Staněk", pos: "Goleiro" },
     { num: 23, nome: "Lukáš Horníček", pos: "Goleiro" },
