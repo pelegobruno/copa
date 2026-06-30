@@ -15,8 +15,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// NÓ DA NUVEM ALTERADO PARA FUGIR DO CACHE ANTIGO!
-const DB_NODE = 'copa26_v2'; 
+// Alterado para um nó novo para forçar a limpeza do cache antigo de erros
+const DB_NODE = 'copa26_v4'; 
 
 // ==========================================
 // SISTEMA DE BANDEIRAS E NOMES
@@ -88,6 +88,7 @@ function salvarBD() { db.ref(DB_NODE).set(bancoDeDados); }
 function recalcularTabelas() {
     listaGrupos.forEach(g => {
         if (!bancoDeDados[g] || !bancoDeDados[g].classificacao) return;
+        
         bancoDeDados[g].classificacao.forEach(t => {
             t.pts = 0; t.j = 0; t.v = 0; t.e = 0; t.d = 0; t.gp = 0; t.gc = 0; t.sg = 0;
         });
@@ -111,11 +112,8 @@ function recalcularTabelas() {
             });
         }
         
-        // CRITÉRIO DE DESEMPATE OFICIAL
         bancoDeDados[g].classificacao.sort((a, b) => {
-            if (b.pts !== a.pts) return b.pts - a.pts; // 1º Pontos
-            
-            // 2º Confronto Direto
+            if (b.pts !== a.pts) return b.pts - a.pts; 
             let confronto = bancoDeDados[g].jogos.find(j => 
                 (j.t1 === a.time && j.t2 === b.time) || (j.t1 === b.time && j.t2 === a.time)
             );
@@ -129,8 +127,6 @@ function recalcularTabelas() {
                     if (g1 > g2) return 1;
                 }
             }
-
-            // 3º Saldo de Gols e 4º Gols Pró
             if (b.sg !== a.sg) return b.sg - a.sg;
             if (b.gp !== a.gp) return b.gp - a.gp;
             return a.time.localeCompare(b.time);
@@ -169,25 +165,18 @@ function atualizarFasesMataMata() {
         if (bancoDeDados["Oitavas"]) {
             bancoDeDados["Oitavas"][0].t1 = pegarVencedor("16-avos", 0, true) || dadosIniciais["Oitavas"][0].t1;
             bancoDeDados["Oitavas"][0].t2 = pegarVencedor("16-avos", 1, true) || dadosIniciais["Oitavas"][0].t2;
-            
             bancoDeDados["Oitavas"][1].t1 = pegarVencedor("16-avos", 2, true) || dadosIniciais["Oitavas"][1].t1;
             bancoDeDados["Oitavas"][1].t2 = pegarVencedor("16-avos", 3, true) || dadosIniciais["Oitavas"][1].t2;
-            
             bancoDeDados["Oitavas"][2].t1 = pegarVencedor("16-avos", 4, true) || dadosIniciais["Oitavas"][2].t1;
             bancoDeDados["Oitavas"][2].t2 = pegarVencedor("16-avos", 5, true) || dadosIniciais["Oitavas"][2].t2;
-            
             bancoDeDados["Oitavas"][3].t1 = pegarVencedor("16-avos", 6, true) || dadosIniciais["Oitavas"][3].t1;
             bancoDeDados["Oitavas"][3].t2 = pegarVencedor("16-avos", 7, true) || dadosIniciais["Oitavas"][3].t2;
-            
             bancoDeDados["Oitavas"][4].t1 = pegarVencedor("16-avos", 8, true) || dadosIniciais["Oitavas"][4].t1;
             bancoDeDados["Oitavas"][4].t2 = pegarVencedor("16-avos", 9, true) || dadosIniciais["Oitavas"][4].t2;
-            
             bancoDeDados["Oitavas"][5].t1 = pegarVencedor("16-avos", 10, true) || dadosIniciais["Oitavas"][5].t1;
             bancoDeDados["Oitavas"][5].t2 = pegarVencedor("16-avos", 11, true) || dadosIniciais["Oitavas"][5].t2;
-            
             bancoDeDados["Oitavas"][6].t1 = pegarVencedor("16-avos", 12, true) || dadosIniciais["Oitavas"][6].t1;
             bancoDeDados["Oitavas"][6].t2 = pegarVencedor("16-avos", 13, true) || dadosIniciais["Oitavas"][6].t2;
-            
             bancoDeDados["Oitavas"][7].t1 = pegarVencedor("16-avos", 14, true) || dadosIniciais["Oitavas"][7].t1;
             bancoDeDados["Oitavas"][7].t2 = pegarVencedor("16-avos", 15, true) || dadosIniciais["Oitavas"][7].t2;
         }
@@ -195,13 +184,10 @@ function atualizarFasesMataMata() {
         if (bancoDeDados["Quartas"]) {
             bancoDeDados["Quartas"][0].t1 = pegarVencedor("Oitavas", 0, true) || dadosIniciais["Quartas"][0].t1;
             bancoDeDados["Quartas"][0].t2 = pegarVencedor("Oitavas", 1, true) || dadosIniciais["Quartas"][0].t2;
-            
             bancoDeDados["Quartas"][1].t1 = pegarVencedor("Oitavas", 2, true) || dadosIniciais["Quartas"][1].t1;
             bancoDeDados["Quartas"][1].t2 = pegarVencedor("Oitavas", 3, true) || dadosIniciais["Quartas"][1].t2;
-            
             bancoDeDados["Quartas"][2].t1 = pegarVencedor("Oitavas", 4, true) || dadosIniciais["Quartas"][2].t1;
             bancoDeDados["Quartas"][2].t2 = pegarVencedor("Oitavas", 5, true) || dadosIniciais["Quartas"][2].t2;
-            
             bancoDeDados["Quartas"][3].t1 = pegarVencedor("Oitavas", 6, true) || dadosIniciais["Quartas"][3].t1;
             bancoDeDados["Quartas"][3].t2 = pegarVencedor("Oitavas", 7, true) || dadosIniciais["Quartas"][3].t2;
         }
@@ -209,17 +195,16 @@ function atualizarFasesMataMata() {
         if (bancoDeDados["Semifinais"]) {
             bancoDeDados["Semifinais"][0].t1 = pegarVencedor("Quartas", 0, true) || dadosIniciais["Semifinais"][0].t1;
             bancoDeDados["Semifinais"][0].t2 = pegarVencedor("Quartas", 1, true) || dadosIniciais["Semifinais"][0].t2;
-            
             bancoDeDados["Semifinais"][1].t1 = pegarVencedor("Quartas", 2, true) || dadosIniciais["Semifinais"][1].t1;
             bancoDeDados["Semifinais"][1].t2 = pegarVencedor("Quartas", 3, true) || dadosIniciais["Semifinais"][1].t2;
         }
 
-        if (bancoDeDados["3º Lugar"] && dadosIniciais["3º Lugar"][0]) {
+        if (bancoDeDados["3º Lugar"] && dadosIniciais["3º Lugar"] && dadosIniciais["3º Lugar"][0]) {
             bancoDeDados["3º Lugar"][0].t1 = pegarVencedor("Semifinais", 0, false) || dadosIniciais["3º Lugar"][0].t1;
             bancoDeDados["3º Lugar"][0].t2 = pegarVencedor("Semifinais", 1, false) || dadosIniciais["3º Lugar"][0].t2;
         }
 
-        if (bancoDeDados["Final"] && dadosIniciais["Final"][0]) {
+        if (bancoDeDados["Final"] && dadosIniciais["Final"] && dadosIniciais["Final"][0]) {
             bancoDeDados["Final"][0].t1 = pegarVencedor("Semifinais", 0, true) || dadosIniciais["Final"][0].t1;
             bancoDeDados["Final"][0].t2 = pegarVencedor("Semifinais", 1, true) || dadosIniciais["Final"][0].t2;
         }
@@ -229,7 +214,26 @@ function atualizarFasesMataMata() {
 }
 
 // ==========================================
-// RELOGIO AO VIVO COM 110 MINUTOS EXATOS
+// FILTRO DE BUSCA DINÂMICO
+// ==========================================
+function aplicarFiltro() {
+    const inputPesquisa = document.getElementById('search-input');
+    if (!inputPesquisa) return;
+    const termo = inputPesquisa.value.toLowerCase().trim();
+
+    // Filtra os cards
+    document.querySelectorAll('.jogos-grid .card').forEach(card => {
+        card.style.display = card.innerText.toLowerCase().includes(termo) ? 'block' : 'none';
+    });
+
+    // Filtra as linhas das tabelas
+    document.querySelectorAll('table tbody tr').forEach(linha => {
+        linha.style.display = linha.innerText.toLowerCase().includes(termo) ? '' : 'none';
+    });
+}
+
+// ==========================================
+// RELÓGIO AUTOMÁTICO (AO VIVO ATÉ 110 MIN, E 0-0 AUTOMÁTICO)
 // ==========================================
 function atualizarStatusAoVivo() {
     const agora = new Date(); let mudouAlgo = false;
@@ -265,7 +269,7 @@ function atualizarStatusAoVivo() {
 setInterval(atualizarStatusAoVivo, 30000);
 
 // ==========================================
-// FUNÇÕES DE EDIÇÃO DE PLACAR
+// EDIÇÃO DE PLACAR
 // ==========================================
 let jogoEditando = null; let faseEditando = null;
 
@@ -326,7 +330,7 @@ document.getElementById('btn-salvar').onclick = () => {
 };
 
 // ==============================================================
-// RENDERIZADOR DE INTERFACE LIMPANDO COLUNAS
+// RENDERIZADOR DA INTERFACE E ABAS (LIVRE DE PCE)
 // ==============================================================
 const menuContainer = document.getElementById('menu');
 const tituloFase = document.getElementById('fase-titulo');
@@ -357,7 +361,7 @@ function carregarAba(abaNome) {
             let arr = listaGrupos.includes(f) ? bancoDeDados[f].jogos : bancoDeDados[f];
             if (arr && Array.isArray(arr)) {
                 arr.forEach((j, idx) => { 
-                    if (j.data && j.data.includes(dataHojeStr)) {
+                    if (j.data && typeof j.data === 'string' && j.data.includes(dataHojeStr)) {
                         jogosHoje.push({ jogo: j, fase: f, index: idx }); 
                     }
                 });
@@ -377,10 +381,10 @@ function carregarAba(abaNome) {
         listaGrupos.forEach(g => {
             if (bancoDeDados[g] && bancoDeDados[g].classificacao && bancoDeDados[g].classificacao[2]) {
                 let c = bancoDeDados[g].classificacao[2];
-                terceiros.push({ grupo: g.replace('Grupo ',''), time: c.time, j: c.j, sg: c.sg, gp: c.gp, pts: c.pts });
+                terceiros.push({ grupo: g.replace('Grupo ',''), time: c.time, j: c.j, sg: c.sg, pts: c.pts });
             }
         });
-        terceiros.sort((a,b) => (b.pts - a.pts) || (b.sg - a.sg) || (b.gp - a.gp) || a.time.localeCompare(b.time));
+        terceiros.sort((a,b) => (b.pts - a.pts) || (b.sg - a.sg) || a.time.localeCompare(b.time));
 
         let rankingHtml = `<div class="ranking-geral-box"><div class="ranking-geral-title">Melhores 3º Colocados</div><table class="ranking-geral-table tabela-terceiros"><thead><tr><th>#</th><th>Seleção</th><th>J</th><th>SG</th><th>Pts</th></tr></thead><tbody>`;
         terceiros.forEach((t, idx) => {
@@ -391,7 +395,7 @@ function carregarAba(abaNome) {
 
         let todosOsTimes = [];
         listaGrupos.forEach(g => { if (bancoDeDados[g]) todosOsTimes = todosOsTimes.concat(bancoDeDados[g].classificacao); });
-        todosOsTimes.sort((a,b) => (b.pts - a.pts) || (b.sg - a.sg) || (b.gp - a.gp) || a.time.localeCompare(b.time));
+        todosOsTimes.sort((a,b) => (b.pts - a.pts) || (b.sg - a.sg) || a.time.localeCompare(b.time));
 
         let rankingGeralHtml = `<div class="grupo-tabela-box" style="margin-top:40px;"><div class="grupo-tabela-header">Ranking Geral da Copa</div><div class="tabela-overflow" style="max-height:400px; overflow-y:auto;"><table class="tabela-classificacao"><thead><tr><th>#</th><th class="time-col">Seleção</th><th>PTS</th><th>J</th><th>SG</th></tr></thead><tbody>`;
         todosOsTimes.forEach((time, idx) => {
@@ -422,10 +426,13 @@ function carregarAba(abaNome) {
         arr.forEach((j, idx) => { cardsHtml += criarCardJogo(j, abaNome, idx); });
         jogosContainer.innerHTML = cardsHtml;
     }
+
+    aplicarFiltro();
 }
 
 function criarCardJogo(jogo, fase, index) {
     const agora = new Date(); let aoVivoClass = '', badgeHtml = '';
+    // VERIFICAÇÃO DE SINTAXE BLINDADA
     if (jogo.data && typeof jogo.data === 'string') {
         const matchInfo = jogo.data.match(/(\d{2})\/(\d{2}).*?(\d{2}):(\d{2})/);
         if (matchInfo) {
@@ -436,10 +443,12 @@ function criarCardJogo(jogo, fase, index) {
         }
     }
     let classT1 = "team home", classT2 = "team away";
-    if (jogo.placar && jogo.placar.trim() !== "-") {
+    if (jogo.placar && typeof jogo.placar === 'string' && jogo.placar.trim() !== "-") {
         let [g1, g2] = jogo.placar.replace(/\s+/g, '').split('-').map(Number);
         let p1 = 0, p2 = 0;
-        if (jogo.penaltis) [p1, p2] = jogo.penaltis.replace(/\s+/g, '').split('-').map(Number);
+        if (jogo.penaltis && typeof jogo.penaltis === 'string') {
+            [p1, p2] = jogo.penaltis.replace(/\s+/g, '').split('-').map(Number);
+        }
         if (g1 > g2 || p1 > p2) { classT1 += " team-winner"; classT2 += " team-loser"; }
         else if (g2 > g1 || p2 > p1) { classT1 += " team-loser"; classT2 += " team-winner"; }
         else { classT1 += " team-draw"; classT2 += " team-draw"; }
@@ -455,17 +464,13 @@ function iniciarApp() {
         btn.onclick = () => carregarAba(aba);
         if (menuContainer) menuContainer.appendChild(btn);
     });
+
+    const inputPesquisa = document.getElementById('search-input');
+    if (inputPesquisa) inputPesquisa.addEventListener('input', aplicarFiltro);
+
     atualizarStatusAoVivo(); 
     carregarAba('Jogos de Hoje');
 }
-
-document.addEventListener("keydown", (e) => {
-    if (e.key === "F4") {
-        if (confirm("Deseja resetar a nuvem e forçar a nova grade linear de 48 seleções?")) {
-            db.ref(DB_NODE).set(dadosIniciais).then(() => { location.reload(); });
-        }
-    }
-});
 
 // ==============================================================
 // INICIALIZAÇÃO INFALÍVEL
@@ -480,20 +485,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     const todasChaves = [...listaGrupos, "16-avos", "Oitavas", "Quartas", "Semifinais", "3º Lugar", "Final"];
                     for (let c of todasChaves) {
-                        if (!bancoDeDados[c]) {
+                        if (!bancoDeDados[c] || !dadosIniciais[c]) {
                             bancoDeDados[c] = JSON.parse(JSON.stringify(dadosIniciais[c]));
                             precisaSalvar = true;
-                        }
-                        let bdJogos = listaGrupos.includes(c) ? bancoDeDados[c].jogos : bancoDeDados[c];
-                        let initJogos = listaGrupos.includes(c) ? dadosIniciais[c].jogos : dadosIniciais[c];
-
-                        if (bdJogos && initJogos) {
-                            bdJogos.forEach((j, i) => {
-                                if (initJogos[i] && j.data !== initJogos[i].data) {
-                                    j.data = initJogos[i].data;
-                                    precisaSalvar = true;
-                                }
-                            });
                         }
                     }
 
@@ -509,12 +503,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else { 
                     carregarAba(document.querySelector('.menu-wrapper button.ativo')?.innerText || 'Jogos de Hoje'); 
                 }
-            } catch(e) {
-                console.error("Erro interno:", e);
-                if (!isAppIniciado) { isAppIniciado = true; bancoDeDados = JSON.parse(JSON.stringify(dadosIniciais)); iniciarApp(); }
-            }
+            } catch(e) { console.error("Erro interno:", e); }
         });
-    } catch(e) {
-        if (!isAppIniciado) { isAppIniciado = true; bancoDeDados = JSON.parse(JSON.stringify(dadosIniciais)); iniciarApp(); }
-    }
+    } catch(e) { console.error("Erro Firebase:", e); }
 });
