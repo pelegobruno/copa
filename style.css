@@ -1,3 +1,6 @@
+/* =========================================================
+   ESTILO PROFISSIONAL / CLEAN & MINIMALISTA
+========================================================= */
 :root {
     --bg-color: #F3F4F6;
     --surface-color: #FFFFFF;
@@ -25,6 +28,7 @@ body { font-family: var(--font-family); background-color: var(--bg-color); color
 .search-bar-wrapper { display: flex; align-items: center; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 20px; padding: 8px 16px; gap: 12px; min-width: 250px; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
 .search-bar-wrapper:focus-within { border-color: var(--primary-accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
 .search-input { border: none; background: transparent; outline: none; font-size: 14px; color: var(--text-primary); width: 100%; }
+.search-input::placeholder { color: #9CA3AF; }
 
 .menu-wrapper { display: flex; overflow-x: auto; gap: 32px; flex: 1; scrollbar-width: none; }
 .menu-wrapper::-webkit-scrollbar { display: none; }
@@ -95,6 +99,19 @@ body { font-family: var(--font-family); background-color: var(--bg-color); color
 .modal-inputs-group { display: flex; justify-content: center; align-items: center; gap: 16px; margin-bottom: 24px; }
 .placar-input { width: 70px; height: 70px; font-size: 32px; font-weight: 700; text-align: center; border: 2px solid var(--border-color); border-radius: 12px; background-color: #F9FAFB; color: var(--text-primary); }
 .placar-input:focus { border-color: var(--primary-accent); background-color: var(--surface-color); outline: none; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+
+/* REMOVE AS SETINHAS DOS INPUTS NUMBER (CORRIGIDO PARA O VSCODE) */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
 .modal-divisor { font-size: 24px; font-weight: 700; color: var(--text-secondary); }
 .modal-penaltis-area { background-color: #FFFBEB; border: 1px solid #FEF3C7; border-radius: 12px; padding: 16px; margin-bottom: 24px; }
 .penaltis-title { margin: 0 0 12px 0; font-size: 14px; font-weight: 700; color: #D97706; text-transform: uppercase; }

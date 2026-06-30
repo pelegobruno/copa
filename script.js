@@ -15,6 +15,9 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+// NÓ DA NUVEM ALTERADO PARA FUGIR DO CACHE ANTIGO!
+const DB_NODE = 'copa26_v2'; 
+
 // ==========================================
 // SISTEMA DE BANDEIRAS E NOMES
 // ==========================================
@@ -43,7 +46,7 @@ function renderTime(nome, lado = 'esquerda') {
 }
 
 // ==========================================
-// ELENCOS E EDIÇÃO DE CARTÕES (PCE)
+// ELENCOS EXTERNOS
 // ==========================================
 function obterElenco(selecao) {
     if (typeof elencosOficiais !== "undefined" && elencosOficiais[selecao]) return elencosOficiais[selecao];
@@ -73,20 +76,6 @@ window.abrirElenco = function(selecao) {
 
 window.fecharElenco = function() { document.getElementById('modal-elenco').style.display = "none"; };
 
-window.editarPCE = function(grupo, timeNome) {
-    if (!bancoDeDados[grupo]) return;
-    let t = bancoDeDados[grupo].classificacao.find(x => x.time === timeNome);
-    if (!t) return;
-    let n = prompt(`Pontos PCE Fair Play para ${timeNome}:`, t.pce || 0);
-    if (n !== null && n.trim() !== "") {
-        let v = parseInt(n.trim());
-        if (!isNaN(v)) {
-            t.pce = v; recalcularTabelas(); atualizarFasesMataMata(); salvarBD();
-            carregarAba(document.querySelector('.menu-wrapper button.ativo')?.innerText || 'Jogos de Hoje');
-        }
-    }
-};
-
 // ==========================================
 // BANCO DE DADOS E CÁLCULO DE GRUPOS
 // ==========================================
@@ -94,15 +83,15 @@ let bancoDeDados = {};
 let isAppIniciado = false;
 const listaGrupos = ["Grupo A", "Grupo B", "Grupo C", "Grupo D", "Grupo E", "Grupo F", "Grupo G", "Grupo H", "Grupo I", "Grupo J", "Grupo K", "Grupo L"];
 
-function salvarBD() { db.ref('copa2026_oficial').set(bancoDeDados); }
+function salvarBD() { db.ref(DB_NODE).set(bancoDeDados); }
 
 function recalcularTabelas() {
     listaGrupos.forEach(g => {
         if (!bancoDeDados[g] || !bancoDeDados[g].classificacao) return;
         bancoDeDados[g].classificacao.forEach(t => {
             t.pts = 0; t.j = 0; t.v = 0; t.e = 0; t.d = 0; t.gp = 0; t.gc = 0; t.sg = 0;
-            if (t.pce === undefined) t.pce = 0;
         });
+
         if (bancoDeDados[g].jogos) {
             bancoDeDados[g].jogos.forEach(j => {
                 if (j.placar && j.placar.trim() !== "-") {
@@ -121,13 +110,38 @@ function recalcularTabelas() {
                 }
             });
         }
-        bancoDeDados[g].classificacao.sort((a, b) => (b.pts - a.pts) || (b.sg - a.sg) || (b.gp - a.gp) || (b.pce - a.pce) || a.time.localeCompare(b.time));
+        
+        // CRITÉRIO DE DESEMPATE OFICIAL
+        bancoDeDados[g].classificacao.sort((a, b) => {
+            if (b.pts !== a.pts) return b.pts - a.pts; // 1º Pontos
+            
+            // 2º Confronto Direto
+            let confronto = bancoDeDados[g].jogos.find(j => 
+                (j.t1 === a.time && j.t2 === b.time) || (j.t1 === b.time && j.t2 === a.time)
+            );
+            if (confronto && confronto.placar && confronto.placar.trim() !== "-") {
+                let [g1, g2] = confronto.placar.replace(/\s+/g, '').split('-').map(Number);
+                if (confronto.t1 === a.time) {
+                    if (g1 > g2) return -1;
+                    if (g2 > g1) return 1;
+                } else {
+                    if (g2 > g1) return -1;
+                    if (g1 > g2) return 1;
+                }
+            }
+
+            // 3º Saldo de Gols e 4º Gols Pró
+            if (b.sg !== a.sg) return b.sg - a.sg;
+            if (b.gp !== a.gp) return b.gp - a.gp;
+            return a.time.localeCompare(b.time);
+        });
+        
         bancoDeDados[g].classificacao.forEach((t, i) => t.pos = i + 1);
     });
 }
 
 // ========================================================
-// SISTEMA LINEAR DE MATA-MATA (BLINDADO POR ÍNDICE ESTRITO)
+// SISTEMA LINEAR DE MATA-MATA
 // ========================================================
 function atualizarFasesMataMata() {
     try {
@@ -152,7 +166,6 @@ function atualizarFasesMataMata() {
             return null;
         };
 
-        // OITAVAS DE FINAL DEPENDEM DA SEGUNDA FASE
         if (bancoDeDados["Oitavas"]) {
             bancoDeDados["Oitavas"][0].t1 = pegarVencedor("16-avos", 0, true) || dadosIniciais["Oitavas"][0].t1;
             bancoDeDados["Oitavas"][0].t2 = pegarVencedor("16-avos", 1, true) || dadosIniciais["Oitavas"][0].t2;
@@ -179,7 +192,6 @@ function atualizarFasesMataMata() {
             bancoDeDados["Oitavas"][7].t2 = pegarVencedor("16-avos", 15, true) || dadosIniciais["Oitavas"][7].t2;
         }
 
-        // QUARTAS DE FINAL
         if (bancoDeDados["Quartas"]) {
             bancoDeDados["Quartas"][0].t1 = pegarVencedor("Oitavas", 0, true) || dadosIniciais["Quartas"][0].t1;
             bancoDeDados["Quartas"][0].t2 = pegarVencedor("Oitavas", 1, true) || dadosIniciais["Quartas"][0].t2;
@@ -194,7 +206,6 @@ function atualizarFasesMataMata() {
             bancoDeDados["Quartas"][3].t2 = pegarVencedor("Oitavas", 7, true) || dadosIniciais["Quartas"][3].t2;
         }
 
-        // SEMIFINAIS
         if (bancoDeDados["Semifinais"]) {
             bancoDeDados["Semifinais"][0].t1 = pegarVencedor("Quartas", 0, true) || dadosIniciais["Semifinais"][0].t1;
             bancoDeDados["Semifinais"][0].t2 = pegarVencedor("Quartas", 1, true) || dadosIniciais["Semifinais"][0].t2;
@@ -203,13 +214,11 @@ function atualizarFasesMataMata() {
             bancoDeDados["Semifinais"][1].t2 = pegarVencedor("Quartas", 3, true) || dadosIniciais["Semifinais"][1].t2;
         }
 
-        // 3º LUGAR
         if (bancoDeDados["3º Lugar"] && dadosIniciais["3º Lugar"][0]) {
             bancoDeDados["3º Lugar"][0].t1 = pegarVencedor("Semifinais", 0, false) || dadosIniciais["3º Lugar"][0].t1;
             bancoDeDados["3º Lugar"][0].t2 = pegarVencedor("Semifinais", 1, false) || dadosIniciais["3º Lugar"][0].t2;
         }
 
-        // FINAL
         if (bancoDeDados["Final"] && dadosIniciais["Final"][0]) {
             bancoDeDados["Final"][0].t1 = pegarVencedor("Semifinais", 0, true) || dadosIniciais["Final"][0].t1;
             bancoDeDados["Final"][0].t2 = pegarVencedor("Semifinais", 1, true) || dadosIniciais["Final"][0].t2;
@@ -220,7 +229,7 @@ function atualizarFasesMataMata() {
 }
 
 // ==========================================
-// RELOGIO AUTOMATICO SEGURO
+// RELOGIO AO VIVO COM 110 MINUTOS EXATOS
 // ==========================================
 function atualizarStatusAoVivo() {
     const agora = new Date(); let mudouAlgo = false;
@@ -235,14 +244,15 @@ function atualizarStatusAoVivo() {
                 const minutosPassados = (agora.getTime() - new Date(2026, mes, dia, hora, min).getTime()) / 60000;
                 let aoVivoOld = jogo.aoVivo; let encerradoOld = jogo.encerrado;
 
-                if (minutosPassados >= 0 && minutosPassados <= 120) {
+                if (minutosPassados >= 0 && minutosPassados <= 110) {
                     jogo.aoVivo = true; jogo.encerrado = false;
                     if (!jogo.placar || jogo.placar.trim() === "-") { jogo.placar = "0-0"; mudouAlgo = true; }
-                } else if (minutosPassados > 120) {
+                } else if (minutosPassados > 110) {
                     jogo.aoVivo = false; jogo.encerrado = true;
                 } else {
                     jogo.aoVivo = false; jogo.encerrado = false;
                 }
+
                 if (jogo.aoVivo !== aoVivoOld || jogo.encerrado !== encerradoOld) mudouAlgo = true;
             }
         });
@@ -316,15 +326,13 @@ document.getElementById('btn-salvar').onclick = () => {
 };
 
 // ==============================================================
-// RENDERIZADOR DE INTERFACE COM FILTRO EXATO DE DATAS
+// RENDERIZADOR DE INTERFACE LIMPANDO COLUNAS
 // ==============================================================
 const menuContainer = document.getElementById('menu');
 const tituloFase = document.getElementById('fase-titulo');
 const classificacaoContainer = document.getElementById('classificacao-container');
 const jogosContainer = document.getElementById('jogos-container');
 const tituloJogos = document.getElementById('jogos-titulo');
-
-// === ABA "Jogos (Fase de Grupos)" REMOVIDA AQUI ===
 const abas = ["Jogos de Hoje", "Tabelas de Classificação", "16-avos", "Oitavas", "Quartas", "Semifinais", "3º Lugar", "Final"];
 
 function carregarAba(abaNome) {
@@ -369,26 +377,25 @@ function carregarAba(abaNome) {
         listaGrupos.forEach(g => {
             if (bancoDeDados[g] && bancoDeDados[g].classificacao && bancoDeDados[g].classificacao[2]) {
                 let c = bancoDeDados[g].classificacao[2];
-                terceiros.push({ grupo: g.replace('Grupo ',''), time: c.time, j: c.j, sg: c.sg, pce: c.pce || 0, pts: c.pts });
+                terceiros.push({ grupo: g.replace('Grupo ',''), time: c.time, j: c.j, sg: c.sg, gp: c.gp, pts: c.pts });
             }
         });
-        terceiros.sort((a,b) => (b.pts - a.pts) || (b.sg - a.sg) || (b.pce - a.pce) || a.time.localeCompare(b.time));
+        terceiros.sort((a,b) => (b.pts - a.pts) || (b.sg - a.sg) || (b.gp - a.gp) || a.time.localeCompare(b.time));
 
-        let rankingHtml = `<div class="ranking-geral-box"><div class="ranking-geral-title">Melhores 3º Colocados</div><table class="ranking-geral-table tabela-terceiros"><thead><tr><th>#</th><th>Seleção</th><th>J</th><th>SG</th><th>PCE</th><th>Pts</th></tr></thead><tbody>`;
+        let rankingHtml = `<div class="ranking-geral-box"><div class="ranking-geral-title">Melhores 3º Colocados</div><table class="ranking-geral-table tabela-terceiros"><thead><tr><th>#</th><th>Seleção</th><th>J</th><th>SG</th><th>Pts</th></tr></thead><tbody>`;
         terceiros.forEach((t, idx) => {
             let rowClass = idx < 8 ? 'classificado-row' : 'eliminado-row';
-            rankingHtml += `<tr class="${rowClass}"><td><strong>${idx+1}</strong></td><td class="time-col time-hover" onclick="abrirElenco('${t.time}')">${renderTime(t.time)} <span class="grupo-tag">${t.grupo}</span></td><td>${t.j}</td><td>${t.sg}</td><td style="cursor:pointer;" onclick="event.stopPropagation(); editarPCE('Grupo ${t.grupo}', '${t.time}')">${t.pce}</td><td><strong>${t.pts}</strong></td></tr>`;
+            rankingHtml += `<tr class="${rowClass}"><td><strong>${idx+1}</strong></td><td class="time-col time-hover" onclick="abrirElenco('${t.time}')">${renderTime(t.time)} <span class="grupo-tag">${t.grupo}</span></td><td>${t.j}</td><td>${t.sg}</td><td><strong>${t.pts}</strong></td></tr>`;
         });
         rankingHtml += `</tbody></table></div>`;
 
         let todosOsTimes = [];
         listaGrupos.forEach(g => { if (bancoDeDados[g]) todosOsTimes = todosOsTimes.concat(bancoDeDados[g].classificacao); });
-        todosOsTimes.sort((a,b) => (b.pts - a.pts) || (b.sg - a.sg) || (b.pce - a.pce) || a.time.localeCompare(b.time));
+        todosOsTimes.sort((a,b) => (b.pts - a.pts) || (b.sg - a.sg) || (b.gp - a.gp) || a.time.localeCompare(b.time));
 
-        let rankingGeralHtml = `<div class="grupo-tabela-box" style="margin-top:40px;"><div class="grupo-tabela-header">Ranking Geral da Copa</div><div class="tabela-overflow" style="max-height:400px; overflow-y:auto;"><table class="tabela-classificacao"><thead><tr><th>#</th><th class="time-col">Seleção</th><th>PCE</th><th>PTS</th><th>J</th><th>SG</th></tr></thead><tbody>`;
+        let rankingGeralHtml = `<div class="grupo-tabela-box" style="margin-top:40px;"><div class="grupo-tabela-header">Ranking Geral da Copa</div><div class="tabela-overflow" style="max-height:400px; overflow-y:auto;"><table class="tabela-classificacao"><thead><tr><th>#</th><th class="time-col">Seleção</th><th>PTS</th><th>J</th><th>SG</th></tr></thead><tbody>`;
         todosOsTimes.forEach((time, idx) => {
-            let gPai = listaGrupos.find(x => bancoDeDados[x] && bancoDeDados[x].classificacao.some(z => z.time === time.time));
-            rankingGeralHtml += `<tr><td>${idx+1}º</td><td class="time-col time-hover" onclick="abrirElenco('${time.time}')">${renderTime(time.time)}</td><td style="cursor:pointer; color:var(--text-secondary);" onclick="event.stopPropagation(); editarPCE('${gPai}', '${time.time}')">${time.pce || 0}</td><td class="pontos-destaque">${time.pts}</td><td>${time.j}</td><td>${time.sg}</td></tr>`;
+            rankingGeralHtml += `<tr><td>${idx+1}º</td><td class="time-col time-hover" onclick="abrirElenco('${time.time}')">${renderTime(time.time)}</td><td class="pontos-destaque">${time.pts}</td><td>${time.j}</td><td>${time.sg}</td></tr>`;
         });
         rankingGeralHtml += `</tbody></table></div></div>`;
 
@@ -402,9 +409,9 @@ function carregarAba(abaNome) {
             let classif = bancoDeDados[g].classificacao;
             let lines = classif.map(time => {
                 let cl = time.pos === 1 ? ' class="primeiro-lugar"' : (time.pos === 2 ? ' class="segundo-lugar"' : '');
-                return `<tr${cl}><td>${time.pos}º</td><td class="time-col time-hover" onclick="abrirElenco('${time.time}')">${renderTime(time.time)}</td><td style="cursor:pointer; color:var(--text-secondary);" onclick="event.stopPropagation(); editarPCE('${g}', '${time.time}')">${time.pce || 0}</td><td class="pontos-destaque">${time.pts}</td><td>${time.j}</td><td>${time.v}</td><td>${time.e}</td><td>${time.d}</td><td>${time.sg}</td></tr>`;
+                return `<tr${cl}><td>${time.pos}º</td><td class="time-col time-hover" onclick="abrirElenco('${time.time}')">${renderTime(time.time)}</td><td class="pontos-destaque">${time.pts}</td><td>${time.j}</td><td>${time.v}</td><td>${time.e}</td><td>${time.d}</td><td>${time.sg}</td></tr>`;
             }).join("");
-            htmlTabelas += `<div class="grupo-tabela-box"><div class="grupo-tabela-header">${g}</div><table class="tabela-classificacao"><thead><tr><th>#</th><th class="time-col">Seleção</th><th>PCE</th><th>PTS</th><th>J</th><th>V</th><th>E</th><th>D</th><th>SG</th></tr></thead><tbody>${lines}</tbody></table></div>`;
+            htmlTabelas += `<div class="grupo-tabela-box"><div class="grupo-tabela-header">${g}</div><table class="tabela-classificacao"><thead><tr><th>#</th><th class="time-col">Seleção</th><th>PTS</th><th>J</th><th>V</th><th>E</th><th>D</th><th>SG</th></tr></thead><tbody>${lines}</tbody></table></div>`;
         });
         classificacaoContainer.innerHTML = htmlTabelas;
     }
@@ -424,8 +431,8 @@ function criarCardJogo(jogo, fase, index) {
         if (matchInfo) {
             const dia = parseInt(matchInfo[1]), mes = parseInt(matchInfo[2]) - 1, hora = parseInt(matchInfo[3]), min = parseInt(matchInfo[4]);
             const minutesPassed = (agora.getTime() - new Date(2026, mes, dia, hora, min).getTime()) / 60000;
-            if (minutesPassed >= 0 && minutesPassed <= 120) { aoVivoClass = ' ao-vivo'; badgeHtml = '<span class="badge-aovivo">AO VIVO</span>'; }
-            else if (minutesPassed > 120) { aoVivoClass = ' jogo-encerrado'; badgeHtml = '<span class="badge-encerrado">ENCERRADO</span>'; }
+            if (minutesPassed >= 0 && minutesPassed <= 110) { aoVivoClass = ' ao-vivo'; badgeHtml = '<span class="badge-aovivo">AO VIVO</span>'; }
+            else if (minutesPassed > 110) { aoVivoClass = ' jogo-encerrado'; badgeHtml = '<span class="badge-encerrado">ENCERRADO</span>'; }
         }
     }
     let classT1 = "team home", classT2 = "team away";
@@ -455,17 +462,17 @@ function iniciarApp() {
 document.addEventListener("keydown", (e) => {
     if (e.key === "F4") {
         if (confirm("Deseja resetar a nuvem e forçar a nova grade linear de 48 seleções?")) {
-            db.ref('copa2026_oficial').set(dadosIniciais).then(() => { location.reload(); });
+            db.ref(DB_NODE).set(dadosIniciais).then(() => { location.reload(); });
         }
     }
 });
 
 // ==============================================================
-// INICIALIZAÇÃO INFALÍVEL COM HARD-SYNC DE DATAS NA NUVEM
+// INICIALIZAÇÃO INFALÍVEL
 // ==============================================================
 document.addEventListener("DOMContentLoaded", () => {
     try {
-        db.ref('copa2026_oficial').on('value', (snapshot) => {
+        db.ref(DB_NODE).on('value', (snapshot) => {
             try {
                 if (snapshot.exists()) {
                     bancoDeDados = snapshot.val();
@@ -477,7 +484,6 @@ document.addEventListener("DOMContentLoaded", () => {
                             bancoDeDados[c] = JSON.parse(JSON.stringify(dadosIniciais[c]));
                             precisaSalvar = true;
                         }
-
                         let bdJogos = listaGrupos.includes(c) ? bancoDeDados[c].jogos : bancoDeDados[c];
                         let initJogos = listaGrupos.includes(c) ? dadosIniciais[c].jogos : dadosIniciais[c];
 
@@ -487,20 +493,14 @@ document.addEventListener("DOMContentLoaded", () => {
                                     j.data = initJogos[i].data;
                                     precisaSalvar = true;
                                 }
-                                if (initJogos[i] && (!j.placar || j.placar === "-") && initJogos[i].placar !== "-") {
-                                    j.placar = initJogos[i].placar;
-                                    precisaSalvar = true;
-                                }
                             });
                         }
                     }
 
-                    if (precisaSalvar) {
-                        db.ref('copa2026_oficial').set(bancoDeDados);
-                    }
+                    if (precisaSalvar) { db.ref(DB_NODE).set(bancoDeDados); }
                 } else {
                     bancoDeDados = JSON.parse(JSON.stringify(dadosIniciais));
-                    db.ref('copa2026_oficial').set(bancoDeDados);
+                    db.ref(DB_NODE).set(bancoDeDados);
                 }
 
                 if (!isAppIniciado) { 

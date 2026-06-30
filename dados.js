@@ -1,13 +1,10 @@
-// =========================================================
-// BANCO DE DADOS OFICIAL - COPA DO MUNDO 2026 (COM RESULTADOS REAIS)
-// =========================================================
 const dadosIniciais = {
     "Grupo A": {
         classificacao: [
-            { pos: 1, time: "México", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 2, time: "Coreia do Sul", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 3, time: "República Tcheca", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 4, time: "África do Sul", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 }
+            { pos: 1, time: "México", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 2, time: "Coreia do Sul", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 3, time: "República Tcheca", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 4, time: "África do Sul", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 }
         ],
         jogos: [
             { data: "11/06 - 16:00", t1: "México", placar: "2-0", t2: "África do Sul", aoVivo: false },
@@ -20,10 +17,10 @@ const dadosIniciais = {
     },
     "Grupo B": {
         classificacao: [
-            { pos: 1, time: "Canadá", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 2, time: "Suíça", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 3, time: "Catar", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 4, time: "Bósnia", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 }
+            { pos: 1, time: "Canadá", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 2, time: "Suíça", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 3, time: "Catar", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 4, time: "Bósnia", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 }
         ],
         jogos: [
             { data: "12/06 - 16:00", t1: "Canadá", placar: "1-1", t2: "Bósnia", aoVivo: false },
@@ -36,10 +33,10 @@ const dadosIniciais = {
     },
     "Grupo C": {
         classificacao: [
-            { pos: 1, time: "Brasil", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 2, time: "Marrocos", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 3, time: "Haiti", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 4, time: "Escócia", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 }
+            { pos: 1, time: "Brasil", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 2, time: "Marrocos", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 3, time: "Haiti", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 4, time: "Escócia", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 }
         ],
         jogos: [
             { data: "13/06 - 19:00", t1: "Brasil", placar: "1-1", t2: "Marrocos", aoVivo: false },
@@ -52,10 +49,10 @@ const dadosIniciais = {
     },
     "Grupo D": {
         classificacao: [
-            { pos: 1, time: "Estados Unidos", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 2, time: "Austrália", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 3, time: "Turquia", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 4, time: "Paraguai", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 }
+            { pos: 1, time: "Estados Unidos", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 2, time: "Austrália", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 3, time: "Turquia", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 4, time: "Paraguai", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 }
         ],
         jogos: [
             { data: "12/06 - 22:00", t1: "Estados Unidos", placar: "4-1", t2: "Paraguai", aoVivo: false },
@@ -68,10 +65,10 @@ const dadosIniciais = {
     },
     "Grupo E": {
         classificacao: [
-            { pos: 1, time: "Alemanha", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 2, time: "Equador", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 3, time: "Costa do Marfim", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 4, time: "Curaçao", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 }
+            { pos: 1, time: "Alemanha", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 2, time: "Equador", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 3, time: "Costa do Marfim", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 4, time: "Curaçao", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 }
         ],
         jogos: [
             { data: "14/06 - 14:00", t1: "Alemanha", placar: "7-1", t2: "Curaçao", aoVivo: false },
@@ -84,10 +81,10 @@ const dadosIniciais = {
     },
     "Grupo F": {
         classificacao: [
-            { pos: 1, time: "Holanda", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 2, time: "Suécia", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 3, time: "Japão", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 4, time: "Tunísia", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 }
+            { pos: 1, time: "Holanda", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 2, time: "Suécia", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 3, time: "Japão", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 4, time: "Tunísia", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 }
         ],
         jogos: [
             { data: "14/06 - 17:00", t1: "Holanda", placar: "2-2", t2: "Japão", aoVivo: false },
@@ -100,10 +97,10 @@ const dadosIniciais = {
     },
     "Grupo G": {
         classificacao: [
-            { pos: 1, time: "Bélgica", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 2, time: "Egito", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 3, time: "Irã", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 4, time: "Nova Zelândia", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 }
+            { pos: 1, time: "Bélgica", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 2, time: "Egito", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 3, time: "Irã", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 4, time: "Nova Zelândia", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 }
         ],
         jogos: [
             { data: "15/06 - 16:00", t1: "Bélgica", placar: "1-1", t2: "Egito", aoVivo: false },
@@ -116,10 +113,10 @@ const dadosIniciais = {
     },
     "Grupo H": {
         classificacao: [
-            { pos: 1, time: "Espanha", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 2, time: "Uruguai", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 3, time: "Arábia Saudita", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 4, time: "Cabo Verde", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 }
+            { pos: 1, time: "Espanha", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 2, time: "Uruguai", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 3, time: "Arábia Saudita", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 4, time: "Cabo Verde", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 }
         ],
         jogos: [
             { data: "15/06 - 13:00", t1: "Espanha", placar: "0-0", t2: "Cabo Verde", aoVivo: false },
@@ -132,10 +129,10 @@ const dadosIniciais = {
     },
     "Grupo I": {
         classificacao: [
-            { pos: 1, time: "França", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 2, time: "Noruega", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 3, time: "Senegal", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 4, time: "Iraque", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 }
+            { pos: 1, time: "França", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 2, time: "Noruega", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 3, time: "Senegal", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 4, time: "Iraque", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 }
         ],
         jogos: [
             { data: "16/06 - 16:00", t1: "França", placar: "3-1", t2: "Senegal", aoVivo: false },
@@ -148,10 +145,10 @@ const dadosIniciais = {
     },
     "Grupo J": {
         classificacao: [
-            { pos: 1, time: "Argentina", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 2, time: "Áustria", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 3, time: "Jordânia", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 4, time: "Argélia", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 }
+            { pos: 1, time: "Argentina", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 2, time: "Áustria", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 3, time: "Jordânia", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 4, time: "Argélia", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 }
         ],
         jogos: [
             { data: "16/06 - 22:00", t1: "Argentina", placar: "3-0", t2: "Argélia", aoVivo: false },
@@ -164,10 +161,10 @@ const dadosIniciais = {
     },
     "Grupo K": {
         classificacao: [
-            { pos: 1, time: "Portugal", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 2, time: "Colômbia", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 3, time: "Uzbequistão", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 4, time: "RD Congo", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 }
+            { pos: 1, time: "Portugal", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 2, time: "Colômbia", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 3, time: "Uzbequistão", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 4, time: "RD Congo", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 }
         ],
         jogos: [
             { data: "17/06 - 14:00", t1: "Portugal", placar: "1-1", t2: "RD Congo", aoVivo: false },
@@ -180,10 +177,10 @@ const dadosIniciais = {
     },
     "Grupo L": {
         classificacao: [
-            { pos: 1, time: "Inglaterra", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 2, time: "Croácia", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 3, time: "Gana", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 },
-            { pos: 4, time: "Panamá", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0, pce: 0 }
+            { pos: 1, time: "Inglaterra", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 2, time: "Croácia", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 3, time: "Gana", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 },
+            { pos: 4, time: "Panamá", pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 }
         ],
         jogos: [
             { data: "17/06 - 17:00", t1: "Inglaterra", placar: "4-2", t2: "Croácia", aoVivo: false },
@@ -196,7 +193,7 @@ const dadosIniciais = {
     },
 
     // ==========================================
-    // SEGUNDA FASE - OS PLACARES QUE JÁ ACONTECERAM ESTÃO AQUI TAMBÉM
+    // SEGUNDA FASE (MATA-MATA COM LAYOUT LINEAR SOLICITADO)
     // ==========================================
     "16-avos": [
         { data: "29/06 - 17:30 (SF1)", t1: "Alemanha", placar: "0-1", t2: "Paraguai", aoVivo: false },
